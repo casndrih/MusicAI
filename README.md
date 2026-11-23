@@ -1,28 +1,36 @@
-# MusicAI — AI Music Remix Studio
+# MusicAI — Local AI Audio Studio
 
-A responsive AI music remix web application built with **Next.js, TypeScript, and Replicate**. Upload a track, describe a new musical direction, and generate one or two alternate arrangements with the MusicGen Remixer model.
+MusicAI is an independent browser-based audio workspace built with Next.js, TypeScript, ONNX Runtime Web and the open Demucs source-separation model.
 
-> MusicAI is an independent project. It is inspired by the workflow and broad visual direction of modern AI music tools; it is not affiliated with MusicWave.ai.
+**Core audio separation runs locally in the visitor's browser.** MusicAI does not upload source audio to its server and does not require Replicate, a paid AI inference API, or an application API token.
 
-![MusicAI](https://img.shields.io/badge/Next.js-15-black?logo=next.js) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![Replicate](https://img.shields.io/badge/AI-Replicate-6B4FBB) ![License](https://img.shields.io/badge/License-Apache--2.0-green)
+> MusicAI is an independent project by [Casper Ndrih (@casndrih)](https://github.com/casndrih). It is not affiliated with YouTube, Spotify, SoundCloud, Apple Music, Bandcamp, Meta or StemSplit.
+
+![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![ONNX Runtime Web](https://img.shields.io/badge/AI-ONNX%20Runtime%20Web-7652d5) ![Demucs](https://img.shields.io/badge/Separation-Demucs-8b6bd0)
 
 ## Live preview
 
-**[Open the MusicAI remix studio preview](https://music-ai-blush.vercel.app/#remixer)** — this link opens the page directly at the AI remixer workspace.
-
-The project is independently designed and developed by [Casper Ndrih (@casndrih)](https://github.com/casndrih). Visit the [About page](https://music-ai-blush.vercel.app/about) for the developer profile and project background.
+**[Open the MusicAI studio](https://music-ai-casndrih.vercel.app/#remixer)**
 
 ## Features
 
-- **Responsive remix studio** with desktop and mobile layouts.
-- **Audio upload** for MP3, WAV, and M4A files (30 MB application upload limit; 8-minute product guideline).
-- **Quick Remix** with prompt presets for Lo-fi, Club, Cinematic, Drum & Bass, Afrobeats, and Synthwave.
-- **Custom Remix** with optional title, lyric/vocal direction, instrumental preference, and vocal direction.
-- **Duo Mix** starts two independent AI remix predictions; **Wave Mix** starts one.
-- **Live job status** polling, generated audio previews, and download links.
-- **Cancel prediction API** for future UI integrations.
-- **Server-side Replicate credentials**; API tokens are never sent to the browser.
-- **Professional landing page** with examples, feature explanations, how-it-works, FAQ, and CTA sections.
+- **Vocal removal:** separates the vocal stem from the backing track.
+- **Instrumental maker:** creates an instrumental mix by subtracting the separated vocal stem from the original mix.
+- **Four-stem separation:** extracts drums, bass, other instruments and vocals.
+- **Local inference:** runs the Demucs ONNX model in the browser using WebGPU when available, with WebAssembly fallback.
+- **Local audio handling:** source audio is decoded, processed and exported in the browser. It is not sent to a MusicAI API.
+- **WAV downloads:** preview and save each generated stem.
+- **Music Source Finder:** opens search results on YouTube, Spotify, SoundCloud, Apple Music and Bandcamp using a title, artist or phrase supplied by the user.
+- **Responsive interface:** existing MusicAI purple branding and automatic light/dark theme are retained.
+
+## Important capability notes
+
+- The Music Source Finder is a **catalogue search shortcut**, not automatic recognition of an unknown recording. Audio fingerprint identification is not implemented in this version.
+- Platform links open the respective services. MusicAI does not scrape, download or rehost their tracks.
+- Separation is limited to **40 MB and 3 minutes** per file in this first browser implementation.
+- Source separation is compute- and memory-intensive. A modern desktop browser or newer mobile device is recommended. WebGPU is preferred; CPU/WebAssembly is the fallback.
+- The first use downloads an approximately **166 MB** ONNX model. The model is served from the public Hugging Face model repository and cached by the browser. The ONNX Runtime WebAssembly runtime is served from jsDelivr. Internet access is therefore needed for the initial asset downloads; subsequent use may benefit from browser caching.
+- Model output quality depends on the source audio and the model. Separation artifacts are possible.
 
 ## Technology
 
@@ -30,35 +38,46 @@ The project is independently designed and developed by [Casper Ndrih (@casndrih)
 | --- | --- |
 | Framework | Next.js App Router |
 | Language | TypeScript |
-| UI | React, custom CSS, Lucide icons |
-| AI inference | Replicate HTTP/client API |
-| Remix model | [sakemin/musicgen-remixer](https://replicate.com/sakemin/musicgen-remixer) |
-| Runtime | Node.js |
+| UI | React, custom CSS, Lucide |
+| Inference runtime | ONNX Runtime Web |
+| Source separation | HT-Demucs ONNX, four-stem model |
+| Browser acceleration | WebGPU, WebAssembly fallback |
+| Audio decode | Web Audio API |
+| Audio export | Browser-generated PCM WAV |
 
-## Architecture
+## How local separation works
+
+1. The browser downloads the ONNX model on first use.
+2. The selected audio file is decoded locally to 44.1 kHz stereo.
+3. The model processes overlapping 7.8-second audio segments.
+4. MusicAI joins the segments and reconstructs the four stems.
+5. The instrumental version is created by subtracting the vocal stem from the original mix.
+6. WAV files are created as browser Blob URLs and downloaded directly by the user.
 
 ```text
-Browser
-  └── RemixWorkspace
-       ├── POST /api/remix
-       │    ├── Validate uploaded audio and prompt
-       │    ├── Create one or two Replicate predictions
-       │    └── Return prediction IDs
-       └── GET /api/remix/:id
-            └── Retrieve prediction status and output URLs
+User's browser
+  ├── Select local audio file
+  ├── Web Audio API decode
+  ├── ONNX Runtime Web
+  │    ├── WebGPU (when available)
+  │    └── WebAssembly fallback
+  ├── HT-Demucs ONNX model
+  │    └── drums / bass / other / vocals
+  ├── Build instrumental mix
+  └── Preview and download WAV files
 
-Next.js server
-  └── Replicate API
-       └── sakemin/musicgen-remixer
+MusicAI Next.js server
+  └── Serves the web application only
+      (no audio upload or inference API)
 ```
-
-The Replicate token is read only by server routes. The browser uploads the selected audio to the Next.js server; the server submits it to Replicate as a model file input. Generation is asynchronous, and the client polls the prediction endpoint until it reaches a terminal state.
 
 ## Requirements
 
 - Node.js 20.9 or newer
-- npm 10+ (or a compatible package manager)
-- A Replicate account and API token with available billing/usage
+- npm 10+
+- A modern browser with Web Audio API
+- WebGPU support recommended; WebAssembly is used as a fallback
+- Internet access for the initial model and runtime downloads
 
 ## Quick start
 
@@ -75,141 +94,69 @@ The Replicate token is read only by server routes. The browser uploads the selec
    npm install
    ```
 
-3. Create your local environment file:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-4. Add your Replicate token to `.env.local`:
-
-   ```env
-   REPLICATE_API_TOKEN=r8_your_actual_token
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
-   ```
-
-   Create/manage tokens at [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens). Keep this value private. Never prefix it with `NEXT_PUBLIC_`.
-
-5. Start the development server:
+3. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000).
+4. Open [http://localhost:3000](http://localhost:3000).
 
-## Environment variables
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `REPLICATE_API_TOKEN` | Yes | Private Replicate API token used by server routes. |
-| `REPLICATE_REMIX_MODEL` | No | Reserved model identifier override for deployments; current version is pinned in the remix route for reproducibility. |
-| `NEXT_PUBLIC_APP_URL` | No | Canonical application URL used for metadata. |
-
-## AI model and generation behavior
-
-The integration uses the Replicate model **sakemin/musicgen-remixer**, pinned to model version:
-
-```text
-0b769f28e399c7c30e4f2360691b9b11c294183e9ab2fd9f3398127b556c86d7
-```
-
-The model accepts a source audio file and a text prompt, then returns generated audio output. Duo Mix launches two independent predictions with different prompt directions/temperatures. Wave Mix launches one prediction.
-
-The model can take several minutes depending on input length and Replicate queue capacity. Replicate usage is billed by the provider and is not included with this repository. Check the model page for current cost and availability before enabling public usage.
-
-**Model capability note:** the custom title, lyrics, instrumental, and vocal controls are included as prompt guidance. They do not imply that the underlying model offers dedicated lyric replacement, isolated vocal editing, or guaranteed instrumental-only controls.
-
-## API
-
-### `POST /api/remix`
-
-Accepts `multipart/form-data`:
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `audio` | File | MP3, WAV, or M4A; up to 30 MB |
-| `prompt` | string | Required; maximum 1,200 characters |
-| `mixType` | string | `duo` or `wave` |
-| `mode` | string | `quick` or `custom` |
-| `title` | string | Optional; maximum 100 characters |
-| `lyrics` | string | Optional; maximum 3,000 characters |
-| `instrumental` | string | `true` or `false` |
-| `vocal` | string | Optional vocal direction |
-
-Returns HTTP 202 with prediction IDs:
-
-```json
-{
-  "predictions": [
-    { "id": "prediction-id", "status": "starting" }
-  ]
-}
-```
-
-Duo Mix returns two prediction entries.
-
-### `GET /api/remix/:id`
-
-Returns the current prediction status, output, error, and timestamps. Status values are provided by Replicate (for example, `starting`, `processing`, `succeeded`, `failed`, or `canceled`).
-
-### `DELETE /api/remix/:id`
-
-Requests cancellation of a prediction. This endpoint is available for integrations; the current workspace does not expose a cancel control.
+No Replicate token or other AI API key is required.
 
 ## Deployment
 
-### Vercel
+Deploy the repository as a Next.js application on Vercel or another Next.js host.
 
-1. Import `casndrih/MusicAI` into Vercel.
-2. Set `REPLICATE_API_TOKEN` in Project Settings → Environment Variables.
-3. Set `NEXT_PUBLIC_APP_URL` to your production URL.
-4. Deploy using the Next.js preset.
+The application sets the following cross-origin isolation headers to support browser audio processing and multi-threaded WebAssembly where supported:
 
-The remix API uses the Node.js runtime. Ensure your host permits request bodies large enough for the configured 30 MB upload limit and supports a sufficiently long serverless function duration. The route currently declares a 60-second function maximum for prediction creation; model generation continues asynchronously and is polled separately.
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Embedder-Policy: require-corp`
 
-### Other Node.js hosts
+The model is currently loaded from Hugging Face and ONNX Runtime WebAssembly assets are loaded from jsDelivr. If you want to eliminate those asset-host dependencies as well, mirror the model and runtime files to infrastructure you control and update the asset URLs. The model is large, so check your hosting provider's static-file and bandwidth limits before bundling it into a deployment.
 
-```bash
-npm ci
-npm run build
-npm start
-```
+## Music source finder
 
-Set the same environment variables in your hosting provider. Do not commit `.env.local`.
+The Music Source Finder creates direct catalogue search links for:
 
-## Production hardening checklist
+- YouTube
+- Spotify
+- SoundCloud
+- Apple Music
+- Bandcamp
 
-This repository provides the core end-to-end generation flow. Before opening it to public users, add:
+It uses the search phrase entered by the visitor. It does not currently fingerprint uploaded audio or claim an automatic match. Search links take the visitor to the platform, where that platform controls its own catalogue, availability and results.
 
-- Authentication and per-user authorization.
-- Durable database records for jobs and ownership.
-- Rate limiting and abuse prevention on create/status routes.
-- Object storage for source audio and generated outputs.
-- Replicate webhook signature verification and durable output ingestion.
-- Usage metering, quotas, and payment/credit accounting.
-- Content moderation, copyright reporting, and a clear upload retention policy.
-- A background queue for retries and long-running workflows.
+## Privacy
 
-Replicate prediction files are temporary and may be deleted after a short retention period. Download outputs you need to retain or add a storage/webhook layer before production use.
+- Source audio is processed in the browser.
+- MusicAI does not expose an audio upload or inference API.
+- Generated WAV files are held as temporary browser Blob URLs.
+- Closing or refreshing the page clears the current in-memory results.
+- The model and runtime binaries are fetched from their configured public asset hosts.
 
-## Testing
+## Model and attribution
+
+The separation model is the HT-Demucs ONNX export published by [StemSplitio](https://huggingface.co/StemSplitio/htdemucs-onnx), based on Meta's [Demucs](https://github.com/facebookresearch/demucs) project.
+
+- Model repository: [StemSplitio/htdemucs-onnx](https://huggingface.co/StemSplitio/htdemucs-onnx)
+- ONNX browser runtime: [ONNX Runtime Web](https://onnxruntime.ai/docs/get-started/with-javascript/web.html)
+- Separation implementation reference: [demucs-onnx](https://github.com/StemSplit/demucs-onnx)
+- Original model paper: [Hybrid Transformers for Music Source Separation](https://arxiv.org/abs/2211.08553)
+
+Review the model and upstream project licenses and training-data notes before commercial use. Third-party assets remain subject to their own licenses and terms.
+
+## Development checks
 
 ```bash
 npm run lint
 npm run build
 ```
 
-For a real generation smoke test, configure a valid Replicate token, upload audio you have rights to use, and submit a short prompt. A missing token is reported as a configuration error by the API.
-
 ## Responsible use
 
-Only upload audio that you own or are authorized to process. Respect copyright, performer rights, and applicable laws when distributing generated remixes. AI output may not be suitable for commercial use; review the model's license and terms before commercial deployment.
-
-## License
-
-This repository is distributed under the Apache License 2.0. See [LICENSE](./LICENSE). The third-party model and its weights are subject to their own licenses and terms; see the [Replicate model page](https://replicate.com/sakemin/musicgen-remixer) for details.
+Only process audio you own or are authorized to use. Respect copyright, performer rights, platform terms and applicable laws. MusicAI provides tools; it does not grant rights to source recordings or separated stems.
 
 ---
 
-Made with care by [casndrih](https://github.com/casndrih).
+Made independently by [Casper Ndrih (@casndrih)](https://github.com/casndrih).
