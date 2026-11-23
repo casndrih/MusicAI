@@ -10,6 +10,7 @@ const SEGMENT = 343980;
 const OVERLAP = Math.floor(SEGMENT / 4);
 const STRIDE = SEGMENT - OVERLAP;
 const MAX_SECONDS = 180;
+const ACOUSTID_CLIENT_KEY = "CDS2IAQHPK";
 
 type Stem = { name: string; url: string; size: number };
 
@@ -51,7 +52,6 @@ export default function RemixWorkspace() {
   const [error, setError] = useState("");
   const [stems, setStems] = useState<Stem[]>([]);
   const [query, setQuery] = useState("");
-  const [acoustIdKey, setAcoustIdKey] = useState(process.env.NEXT_PUBLIC_ACOUSTID_CLIENT_KEY || "");
   const [identifying, setIdentifying] = useState(false);
   const [identifyStatus, setIdentifyStatus] = useState("");
   const [identifyError, setIdentifyError] = useState("");
@@ -171,7 +171,6 @@ export default function RemixWorkspace() {
 
   const identifyTrack = async () => {
     if (!file) { setIdentifyError("Choose an audio file first."); return; }
-    if (!acoustIdKey.trim()) { setIdentifyError("Enter your AcoustID application key to enable recognition."); return; }
     setIdentifying(true); setIdentifyError(""); setIdentifyResult(null);
     let context: AudioContext | null = null;
     try {
@@ -195,7 +194,7 @@ export default function RemixWorkspace() {
       if (!fingerprint.compressed) throw new Error("Could not generate an audio fingerprint from this file.");
       setIdentifyStatus("Checking the AcoustID music catalogue…");
       const body = new URLSearchParams({
-        client: acoustIdKey.trim(),
+        client: ACOUSTID_CLIENT_KEY,
         duration: String(Math.round(duration)),
         fingerprint: fingerprint.compressed,
         meta: "recordings+releasegroups+compress",
@@ -294,9 +293,6 @@ export default function RemixWorkspace() {
       <label className="field-label" htmlFor="identify-audio">AUDIO CLIP FOR RECOGNITION</label>
       <input id="identify-audio" className="text-input" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg" onChange={chooseFile}/>
       {file && <p className="local-status"><ShieldCheck size={14}/> Selected: {file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB</p>}
-      <label className="field-label" htmlFor="acoustid-key">ACOUSTID APPLICATION KEY</label>
-      <input id="acoustid-key" className="text-input" value={acoustIdKey} onChange={(e) => setAcoustIdKey(e.target.value)} placeholder="Paste your AcoustID client key"/>
-      <p className="local-status">Your key is used only in this browser session and is not saved by MusicAI.</p>
       <button className="generate-button" onClick={identifyTrack} disabled={identifying || !file}>{identifying ? <><LoaderCircle className="spin" size={18}/> Identifying on this device…</> : <><Search size={18}/> Identify this recording <span>↗</span></>}</button>
       {identifyStatus && <p className="local-status">{identifyStatus}</p>}
       {identifyError && <div className="error-message"><CircleAlert size={17}/>{identifyError}</div>}
@@ -311,7 +307,7 @@ export default function RemixWorkspace() {
       <label className="field-label" htmlFor="music-query">OR SEARCH BY SONG TITLE, ARTIST OR PHRASE</label>
       <div className="finder-input-row"><input id="music-query" className="text-input" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && query.trim()) window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer"); }} placeholder="e.g. song title and artist"/><button className="generate-button" disabled={!query.trim()} onClick={() => window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer")}><Search size={17}/> Search</button></div>
       <div className="source-link-grid">{sourceLinks.map((source) => <a key={source.name} href={query.trim() ? source.url : undefined} target="_blank" rel="noreferrer" aria-disabled={!query.trim()} onClick={(e) => { if (!query.trim()) e.preventDefault(); }}><span>{source.name}</span><span>Open results ↗</span></a>)}</div>
-      <div className="local-model-note"><b>Identification note:</b> this finder searches the platforms using the title, artist or phrase you provide. Automatic recognition from an unknown audio recording is not enabled yet; that requires a dedicated fingerprint catalogue and its own service/API access. MusicAI does not download or rehost tracks from these platforms.</div>
+      <div className="local-model-note"><b>Identification note:</b> automatic recognition uses the AcoustID catalogue. MusicAI links to matching searches on music platforms but does not download or rehost tracks.</div>
     </div>}
   </div>;
 }
