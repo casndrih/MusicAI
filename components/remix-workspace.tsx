@@ -268,7 +268,7 @@ export default function RemixWorkspace() {
   const loadYoutubePreview = async () => {
     setYoutubeError(""); setYoutubeVideo(null);
     const raw = youtubeUrl.trim();
-    const match = raw.match(/(?:youtube\\.com\\/(?:watch\\?.*v=|embed\\/|shorts\\/|live\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{11})/) || ( /^[A-Za-z0-9_-]{11}$/.test(raw) ? [raw, raw] : null);
+    const match = raw.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/) || ( /^[A-Za-z0-9_-]{11}$/.test(raw) ? [raw, raw] : null);
     if (!match) { setYoutubeError("Paste a valid YouTube video link or 11-character video ID."); return; }
     const id = match[1];
     setYoutubeLoading(true);
@@ -288,8 +288,8 @@ export default function RemixWorkspace() {
     setSpotifyError(""); setSpotifyPreview(null);
     let parsed: URL;
     try { parsed = new URL(spotifyUrl.trim()); } catch { setSpotifyError("Paste a valid Spotify track, album, playlist, episode or show link."); return; }
-    if (!/(^|\\.)spotify\\.com$/.test(parsed.hostname)) { setSpotifyError("Only open.spotify.com links are supported."); return; }
-    const match = parsed.pathname.match(/^\\/(track|album|playlist|episode|show)\\/([A-Za-z0-9]+)\\/?$/);
+    if (!/(^|\.)spotify\.com$/.test(parsed.hostname)) { setSpotifyError("Only open.spotify.com links are supported."); return; }
+    const match = parsed.pathname.match(/^\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)\/?$/);
     if (!match) { setSpotifyError("This Spotify link type is not supported. Paste a track, album, playlist, episode or show URL."); return; }
     const type = match[1];
     const canonical = "https://open.spotify.com/" + type + "/" + match[2];
@@ -323,7 +323,7 @@ export default function RemixWorkspace() {
       const url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = file.name.replace(/\\.[^.]+$/, "") + ".wav";
+      anchor.download = file.name.replace(/\.[^.]+$/, "") + ".wav";
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       URL.revokeObjectURL(url);
     } catch (cause) {
