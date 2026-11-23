@@ -5,7 +5,6 @@ import { AudioLines, Check, ChevronDown, CircleAlert, Download, FileAudio, Loade
 
 type Job = { id: string; status: string; output?: unknown; error?: string; logs?: string };
 type Track = { name: string; size: number; file: File; url: string };
-type ResultTrack = { url: string; label: string };
 
 const presets = [
   { name: "Lo-fi", prompt: "Warm lo-fi chillhop, dusty vinyl texture, mellow electric piano, relaxed boom-bap drums, soft bass, intimate late-night atmosphere." },
@@ -119,7 +118,6 @@ export default function RemixWorkspace() {
     audio.onerror = () => { setPlaying(null); setError("This audio preview could not be played. Try downloading it instead."); };
     setActiveAudio(audio); setPlaying(url); void audio.play();
   };
-  const allResults = jobs.flatMap((job, index) => outputUrls(job.output).map((url, outputIndex) => ({ url, label: `Remix ${String.fromCharCode(65 + index + outputIndex)}` }))) as ResultTrack[];
   const isRunning = jobs.some((job) => !["succeeded", "failed", "canceled"].includes(job.status));
 
   return <div className="studio-shell">
