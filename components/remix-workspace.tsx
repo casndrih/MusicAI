@@ -50,6 +50,10 @@ export default function RemixWorkspace() {
   const [youtubeVideo, setYoutubeVideo] = useState<{ id: string; title: string; author: string; thumbnail: string } | null>(null);
   const [youtubeLoading, setYoutubeLoading] = useState(false);
   const [youtubeError, setYoutubeError] = useState("");
+  const [spotifyUrl, setSpotifyUrl] = useState("");
+  const [spotifyPreview, setSpotifyPreview] = useState<{ embedUrl: string; title: string; thumbnail: string; type: string } | null>(null);
+  const [spotifyLoading, setSpotifyLoading] = useState(false);
+  const [spotifyError, setSpotifyError] = useState("");
   const [converting, setConverting] = useState(false);
   const [status, setStatus] = useState("Choose an audio file to begin.");
   const [progress, setProgress] = useState(0);
@@ -280,6 +284,33 @@ export default function RemixWorkspace() {
     }
   };
 
+  const loadSpotifyPreview = async () => {
+    setSpotifyError(""); setSpotifyPreview(null);
+    let parsed: URL;
+    try { parsed = new URL(spotifyUrl.trim()); } catch { setSpotifyError("Paste a valid Spotify track, album, playlist, episode or show link."); return; }
+    if (!/(^|\\.)spotify\\.com$/.test(parsed.hostname)) { setSpotifyError("Only open.spotify.com links are supported."); return; }
+    const match = parsed.pathname.match(/^\\/(track|album|playlist|episode|show)\\/([A-Za-z0-9]+)\\/?$/);
+    if (!match) { setSpotifyError("This Spotify link type is not supported. Paste a track, album, playlist, episode or show URL."); return; }
+    const type = match[1];
+    const canonical = "https://open.spotify.com/" + type + "/" + match[2];
+    setSpotifyLoading(true);
+    try {
+      const response = await fetch("https://open.spotify.com/oembed?url=" + encodeURIComponent(canonical));
+      if (!response.ok) throw new Error("Spotify could not provide preview information for this link.");
+      const info = await response.json() as { title?: string; thumbnail_url?: string };
+      setSpotifyPreview({
+        embedUrl: "https://open.spotify.com/embed/" + type + "/" + match[2] + "?utm_source=generator",
+        title: info.title || (type.charAt(0).toUpperCase() + type.slice(1)),
+        thumbnail: info.thumbnail_url || "",
+        type
+      });
+    } catch (cause) {
+      setSpotifyError(cause instanceof Error ? cause.message : "Could not load Spotify preview.");
+    } finally {
+      setSpotifyLoading(false);
+    }
+  };
+
   const convertUploadToWav = async () => {
     if (!file) { setYoutubeError("Choose an audio file first in the Vocal remover tab."); return; }
     setConverting(true); setYoutubeError("");
@@ -376,6 +407,19 @@ export default function RemixWorkspace() {
         <div className="youtube-player"><iframe src={"https://www.youtube-nocookie.com/embed/" + youtubeVideo.id} title={youtubeVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen referrerPolicy="strict-origin-when-cross-origin"/></div>
         <div className="youtube-details"><img src={youtubeVideo.thumbnail} alt="Video thumbnail"/><div><span className="local-kicker">YOUTUBE VIDEO DETAILS</span><h3>{youtubeVideo.title}</h3><p>{youtubeVideo.author}</p><a className="stem-download" href={"https://www.youtube.com/watch?v=" + youtubeVideo.id} target="_blank" rel="noreferrer">Open on YouTube ↗</a></div></div>
       </div>}
+      <div className="spotify-preview-section">
+        <span className="local-kicker">SPOTIFY TRACK & ALBUM PREVIEW</span>
+        <h3>Open a Spotify preview.</h3>
+        <p>Paste a Spotify track, album, playlist or podcast link to load its official embedded player and available artwork.</p>
+        <div className="finder-input-row"><input className="text-input" aria-label="Spotify URL" value={spotifyUrl} onChange={(e) => setSpotifyUrl(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void loadSpotifyPreview(); }} placeholder="https://open.spotify.com/track/..."/><button className="generate-button" onClick={loadSpotifyPreview} disabled={spotifyLoading || !spotifyUrl.trim()}>{spotifyLoading ? <><LoaderCircle className="spin" size={17}/> Loading…</> : <><Search size={17}/> Preview Spotify</>}</button></div>
+        {spotifyError && <div className="error-message"><CircleAlert size={17}/>{spotifyError}</div>}
+        {spotifyPreview && <div className="spotify-preview-card">
+          {spotifyPreview.thumbnail && <img src={spotifyPreview.thumbnail} alt={spotifyPreview.title + " artwork"}/>}
+          <div className="spotify-preview-copy"><span className="local-kicker">{spotifyPreview.type.toUpperCase()} · SPOTIFY</span><h3>{spotifyPreview.title}</h3><a className="stem-download" href={spotifyUrl.trim()} target="_blank" rel="noreferrer">Open in Spotify ↗</a></div>
+          <iframe src={spotifyPreview.embedUrl} title={"Spotify " + spotifyPreview.type + " preview"} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"/>
+        </div>}
+        <div className="local-model-note"><b>Spotify downloads:</b> Spotify's player and catalogue preview are supported, but MusicAI cannot extract or download protected Spotify streams. Use Spotify's official offline-download feature where your subscription and region support it, or convert audio files you own using the local converter.</div>
+      </div>
       <div className="local-model-note"><b>About downloads:</b> MusicAI does not rip or extract audio from YouTube. You can preview videos here and use the converter below for audio files you own or are authorized to process.</div>
       <div className="youtube-convert-card"><div><span className="local-kicker">LOCAL FILE CONVERTER</span><h3>Convert an audio file to WAV.</h3><p>{file ? "Selected file: " + file.name : "Choose an audio file in the Vocal remover tab first."} Conversion happens in your browser; no upload to MusicAI.</p></div><button className="generate-button" onClick={convertUploadToWav} disabled={!file || converting}>{converting ? <><LoaderCircle className="spin" size={17}/> Converting…</> : <><Download size={17}/> Convert & download WAV</>}</button></div>
       <div className="local-model-note"><b>Album and release information:</b> identify a recording in the Music Identification tab to see catalogue album information and links to YouTube, Spotify, SoundCloud, Apple Music and Bandcamp. YouTube's video metadata does not reliably include an official album or track release.</div>
