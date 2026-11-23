@@ -1,5 +1,5 @@
 import RemixWorkspace from "@/components/remix-workspace";
-import { AudioWaveform, ArrowUpRight, Check, Clapperboard, Disc3, Guitar, Headphones, Layers3, Mic2, Music2, Radio, SlidersHorizontal, Sparkles, WandSparkles, Waves } from "lucide-react";
+import { AudioWaveform, ArrowUpRight, Check, Clapperboard, Disc3, Headphones, Layers3, Mic2, Music2, Search, Sparkles, WandSparkles } from "lucide-react";
 
 const examples = [
   { n: "01", name: "Sapphire", style: "Melodic house", genre: "HOUSE", color: "art-violet", note: "Warm synths, a steady kick and a wide melodic lift." },
