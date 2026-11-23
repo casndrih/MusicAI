@@ -1,5 +1,5 @@
 import RemixWorkspace from "@/components/remix-workspace";
-import { AudioWaveform, ArrowUpRight, Check, Clapperboard, Disc3, Headphones, Layers3, Mic2, Music2, Search, Sparkles, WandSparkles } from "lucide-react";
+import { AudioWaveform, ArrowUpRight, Check, Disc3, Headphones, Layers3, Mic2, Music2, Search, Sparkles, WandSparkles, Waves } from "lucide-react";
 
 const examples = [
   { n: "01", name: "Sapphire", style: "Melodic house", genre: "HOUSE", color: "art-violet", note: "Warm synths, a steady kick and a wide melodic lift." },
@@ -31,10 +31,10 @@ const faqs = [
 
 export default function Home() {
   return <main>
-    <div className="announcement-bar"><span className="announcement-pill">MUSICAI STUDIO</span><span>Explore a new direction for your sound.</span><a href="#remixer">Try the remixer <ArrowUpRight size={13}/></a></div>
+    <div className="announcement-bar"><span className="announcement-pill">MUSICAI STUDIO</span><span>Explore a new direction for your sound.</span><a href="#remixer">Try the tools <ArrowUpRight size={13}/></a></div>
     <header className="site-header">
       <a className="brand" href="#" aria-label="MusicAI home"><span className="brand-mark"><AudioWaveform size={22}/></span><span>Music<span className="brand-accent">AI</span></span></a>
-      <nav className="main-nav"><a href="#remixer">AI Remixer</a><a href="#examples">Examples</a><a href="#how-it-works">How it works</a><a href="#plans">Studio info</a><a href="#faq">FAQ</a><a href="/about">About</a></nav>
+      <nav className="main-nav"><a href="#remixer">Audio tools</a><a href="#examples">Examples</a><a href="#how-it-works">How it works</a><a href="#plans">Studio info</a><a href="#faq">FAQ</a><a href="/about">About</a></nav>
       <a className="header-cta" href="#remixer">Open studio <ArrowUpRight size={15}/></a>
     </header>
     <section className="hero">
@@ -42,13 +42,13 @@ export default function Home() {
       <div className="hero-copy"><div className="eyebrow"><span className="eyebrow-dot"/> LOCAL AI AUDIO STUDIO <span className="eyebrow-line"/></div>
         <h1>Give your song<br/><span>a new sound.</span></h1>
         <p className="hero-description">Remove vocals, create instrumentals and split your music into separate stems. MusicAI runs its AI separation engine locally in your browser.</p>
-        <div className="hero-actions"><a className="button button-primary" href="#remixer"><WandSparkles size={17}/> Remix your song <ArrowUpRight size={16}/></a><a className="text-link" href="#examples">Explore remix ideas <span>↗</span></a></div>
+        <div className="hero-actions"><a className="button button-primary" href="#remixer"><WandSparkles size={17}/> Remove vocals <ArrowUpRight size={16}/></a><a className="text-link" href="#examples">Explore music sources <span>↗</span></a></div>
         <div className="hero-proof"><div className="proof-icons"><span><Music2 size={14}/></span><span><Disc3 size={14}/></span><span><Headphones size={14}/></span></div><span>Your audio. Your device. Your stems.</span></div>
       </div>
       <div className="hero-art" aria-label="Abstract music record artwork"><div className="orbit orbit-a"/><div className="orbit orbit-b"/>
         <div className="vinyl"><div className="vinyl-grooves"/><div className="vinyl-label"><AudioWaveform size={37}/><small>MA</small></div></div>
-        <div className="floating-card card-top"><span className="mini-wave">{Array.from({length:18},(_,i)=><i key={i} style={{height:`${12+(i*17)%31}px`}}/>)}</span><span><b>NEW DIRECTION</b><small>Melodic house · warm synths</small></span><Sparkles size={17}/></div>
-        <div className="floating-card card-bottom"><span className="equalizer"><i/><i/><i/><i/><i/></span><span><b>STYLE SHIFT</b><small>Original → New interpretation</small></span><span className="live-dot"/></div>
+        <div className="floating-card card-top"><span className="mini-wave">{Array.from({length:18},(_,i)=><i key={i} style={{height:`${12+(i*17)%31}px`}}/>)}</span><span><b>LOCAL AI MODEL</b><small>Vocals · drums · bass · other</small></span><Sparkles size={17}/></div>
+        <div className="floating-card card-bottom"><span className="equalizer"><i/><i/><i/><i/><i/></span><span><b>STEM SEPARATION</b><small>Source mix → separated stems</small></span><span className="live-dot"/></div>
         <div className="art-caption">MAKE ROOM FOR A NEW SOUND <span>✳</span></div>
       </div>
       <div className="hero-bottom"><span>SCROLL TO EXPLORE</span><span className="scroll-mark">↓</span><span>01 / 04</span></div>
