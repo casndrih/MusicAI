@@ -174,30 +174,41 @@ export default function RemixWorkspace() {
     setIdentifying(true); setIdentifyError(""); setIdentifyResult(null);
     let context: AudioContext | null = null;
     try {
-      setIdentifyStatus("Decoding audio locally…");
-      context = new AudioContext({ sampleRate: 44100 });
+      setIdentifyStatus("Decoding the complete recording locally…");
+      context = new AudioContext();
       const decoded = await context.decodeAudioData(await file.arrayBuffer());
       const sampleRate = decoded.sampleRate;
-      const duration = Math.min(decoded.duration, 120);
-      const frames = Math.floor(duration * sampleRate);
+      const duration = decoded.duration;
       if (duration < 8) throw new Error("Choose a clip at least 8 seconds long for a reliable match.");
-      setIdentifyStatus("Generating a Chromaprint fingerprint in your browser…");
-      const left = decoded.getChannelData(0);
-      const right = decoded.numberOfChannels > 1 ? decoded.getChannelData(1) : left;
-      const interleaved = new Int16Array(frames * 2);
-      for (let i = 0; i < frames; i++) {
-        interleaved[i * 2] = Math.max(-32768, Math.min(32767, Math.round(left[i] * 32767)));
-        interleaved[i * 2 + 1] = Math.max(-32768, Math.min(32767, Math.round(right[i] * 32767)));
-      }
+      const channels = Math.min(decoded.numberOfChannels, 2);
+      if (channels < 1) throw new Error("The selected file has no audio channels.");
+
+      setIdentifyStatus("Generating a full-track Chromaprint fingerprint in your browser…");
       const chroma = await import("rusty-chromaprint-wasm");
-      const fingerprint = chroma.fingerprintFromSamples(sampleRate, 2, interleaved);
-      if (!fingerprint.compressed) throw new Error("Could not generate an audio fingerprint from this file.");
+      const fingerprinter = new chroma.Fingerprinter();
+      fingerprinter.start(sampleRate, channels);
+      const left = decoded.getChannelData(0);
+      const right = channels > 1 ? decoded.getChannelData(1) : left;
+      const chunkFrames = 16384;
+      for (let offset = 0; offset < decoded.length; offset += chunkFrames) {
+        const count = Math.min(chunkFrames, decoded.length - offset);
+        const samples = new Int16Array(count * channels);
+        for (let i = 0; i < count; i++) {
+          samples[i * channels] = Math.max(-32768, Math.min(32767, Math.round(left[offset + i] * 32768)));
+          if (channels > 1) samples[i * channels + 1] = Math.max(-32768, Math.min(32767, Math.round(right[offset + i] * 32768)));
+        }
+        fingerprinter.consume(samples);
+      }
+      fingerprinter.finish();
+      const fingerprint = fingerprinter.getCompressedFingerprint();
+      if (!fingerprint) throw new Error("Could not generate an audio fingerprint from this file.");
+
       setIdentifyStatus("Checking the AcoustID music catalogue…");
       const body = new URLSearchParams({
         client: ACOUSTID_CLIENT_KEY,
         duration: String(Math.round(duration)),
-        fingerprint: fingerprint.compressed,
-        meta: "recordings+releasegroups+compress",
+        fingerprint,
+        meta: "recordings+releasegroups",
         format: "json"
       });
       const response = await fetch("https://api.acoustid.org/v2/lookup", {
@@ -205,7 +216,7 @@ export default function RemixWorkspace() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body
       });
-      if (!response.ok) throw new Error("AcoustID lookup failed (HTTP " + response.status + "). Check your key or try again.");
+      if (!response.ok) throw new Error("AcoustID lookup failed (HTTP " + response.status + "). Check the application key or try again.");
       const payload = await response.json() as {
         status?: string;
         error?: { message?: string };
@@ -225,7 +236,7 @@ export default function RemixWorkspace() {
         .sort((a, b) => b.score - a.score);
       const match = matches[0];
       if (!match?.recording?.title) {
-        setIdentifyStatus("No catalogue match found. Try a clearer or longer section of the original recording.");
+        setIdentifyStatus("AcoustID received the fingerprint but found no catalogue match. Try a clean 10–30 second section with minimal speech, crowd noise or remix effects. Some tracks are not in its database.");
         return;
       }
       setIdentifyResult({
