@@ -20,12 +20,13 @@ MusicAI is an independent browser-based audio workspace built with Next.js, Type
 - **Local inference:** runs the Demucs ONNX model in the browser using WebGPU when available, with WebAssembly fallback.
 - **Local audio handling:** source audio is decoded, processed and exported in the browser. It is not sent to a MusicAI API.
 - **WAV downloads:** preview and save each generated stem.
-- **Music Source Finder:** opens search results on YouTube, Spotify, SoundCloud, Apple Music and Bandcamp using a title, artist or phrase supplied by the user.
+- **Audio fingerprint recognition:** generates a Chromaprint fingerprint in the browser and checks it against AcoustID, returning likely recording metadata and source-platform search links. A registered AcoustID application key is required.
+- **Music Source Finder:** also opens search results on YouTube, Spotify, SoundCloud, Apple Music and Bandcamp using a title, artist or phrase supplied by the user.
 - **Responsive interface:** existing MusicAI purple branding and automatic light/dark theme are retained.
 
 ## Important capability notes
 
-- The Music Source Finder is a **catalogue search shortcut**, not automatic recognition of an unknown recording. Audio fingerprint identification is not implemented in this version.
+- Audio fingerprint recognition is a catalogue lookup, not a guarantee: unknown, obscure, live, remixed or unreleased recordings may not match. The user must supply a registered AcoustID application key. AcoustID is an external catalogue service with its own availability, rate limits and usage terms.
 - Platform links open the respective services. MusicAI does not scrape, download or rehost their tracks.
 - Separation is limited to **40 MB and 3 minutes** per file in this first browser implementation.
 - Source separation is compute- and memory-intensive. A modern desktop browser or newer mobile device is recommended. WebGPU is preferred; CPU/WebAssembly is the fallback.
@@ -41,6 +42,8 @@ MusicAI is an independent browser-based audio workspace built with Next.js, Type
 | UI | React, custom CSS, Lucide |
 | Inference runtime | ONNX Runtime Web |
 | Source separation | HT-Demucs ONNX, four-stem model |
+| Fingerprinting | Chromaprint WASM (AcoustID-compatible preset) |
+| Recognition catalogue | AcoustID / MusicBrainz metadata |
 | Browser acceleration | WebGPU, WebAssembly fallback |
 | Audio decode | Web Audio API |
 | Audio export | Browser-generated PCM WAV |
