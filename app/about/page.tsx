@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, AudioWaveform, Code2, ExternalLink, Github, Music2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, AudioWaveform, Code2, ExternalLink, Music2, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About the Developer — MusicAI",
-  description: "Meet the developer behind MusicAI, an independent AI-powered music remix studio."
+  description: "Meet the developer behind MusicAI, an independent browser-based local AI audio studio."
 };
 
 type GithubProfile = {
