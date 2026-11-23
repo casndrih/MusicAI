@@ -45,7 +45,12 @@ function makeWindow() {
 export default function RemixWorkspace() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [tab, setTab] = useState<"separate" | "identify">("separate");
+  const [tab, setTab] = useState<"separate" | "identify" | "youtube">("separate");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [youtubeVideo, setYoutubeVideo] = useState<{ id: string; title: string; author: string; thumbnail: string } | null>(null);
+  const [youtubeLoading, setYoutubeLoading] = useState(false);
+  const [youtubeError, setYoutubeError] = useState("");
+  const [converting, setConverting] = useState(false);
   const [status, setStatus] = useState("Choose an audio file to begin.");
   const [progress, setProgress] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -256,6 +261,48 @@ export default function RemixWorkspace() {
     }
   };
 
+  const loadYoutubePreview = async () => {
+    setYoutubeError(""); setYoutubeVideo(null);
+    const raw = youtubeUrl.trim();
+    const match = raw.match(/(?:youtube\\.com\\/(?:watch\\?.*v=|embed\\/|shorts\\/|live\\/)|youtu\\.be\\/)([A-Za-z0-9_-]{11})/) || ( /^[A-Za-z0-9_-]{11}$/.test(raw) ? [raw, raw] : null);
+    if (!match) { setYoutubeError("Paste a valid YouTube video link or 11-character video ID."); return; }
+    const id = match[1];
+    setYoutubeLoading(true);
+    try {
+      const response = await fetch("https://www.youtube.com/oembed?url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + id) + "&format=json");
+      if (!response.ok) throw new Error("YouTube could not provide preview details for this video. It may be private, restricted or unavailable.");
+      const info = await response.json() as { title?: string; author_name?: string; thumbnail_url?: string };
+      setYoutubeVideo({ id, title: info.title || "YouTube video", author: info.author_name || "YouTube creator", thumbnail: info.thumbnail_url || "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" });
+    } catch (cause) {
+      setYoutubeError(cause instanceof Error ? cause.message : "Could not load YouTube preview details.");
+    } finally {
+      setYoutubeLoading(false);
+    }
+  };
+
+  const convertUploadToWav = async () => {
+    if (!file) { setYoutubeError("Choose an audio file first in the Vocal remover tab."); return; }
+    setConverting(true); setYoutubeError("");
+    let context: AudioContext | null = null;
+    try {
+      context = new AudioContext();
+      const decoded = await context.decodeAudioData(await file.arrayBuffer());
+      const channels = Array.from({ length: Math.min(decoded.numberOfChannels, 2) }, (_, index) => new Float32Array(decoded.getChannelData(index)));
+      const wav = encodeWav(channels, decoded.length, decoded.sampleRate);
+      const url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = file.name.replace(/\\.[^.]+$/, "") + ".wav";
+      document.body.appendChild(anchor); anchor.click(); anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (cause) {
+      setYoutubeError(cause instanceof Error ? cause.message : "Could not convert this audio file.");
+    } finally {
+      await context?.close().catch(() => undefined);
+      setConverting(false);
+    }
+  };
+
   const playStem = (stem: Stem) => {
     if (playing === stem.name) { audioRef.current?.pause(); setPlaying(null); return; }
     audioRef.current?.pause();
@@ -280,8 +327,9 @@ export default function RemixWorkspace() {
       <span className="studio-secure"><ShieldCheck size={14}/> AUDIO STAYS ON YOUR DEVICE</span>
     </div>
     <div className="local-tabs">
-      <button className={tab === "separate" ? "active" : ""} onClick={() => setTab("separate")}><AudioLines size={16}/> Vocal remover & stems</button>
-      <button className={tab === "identify" ? "active" : ""} onClick={() => setTab("identify")}><Search size={16}/> Music source finder</button>
+      <button className={tab === "separate" ? "active" : ""} onClick={() => setTab("separate")}><AudioLines size={16}/> Vocal remover</button>
+      <button className={tab === "identify" ? "active" : ""} onClick={() => setTab("identify")}><Search size={16}/> Music identification</button>
+      <button className={tab === "youtube" ? "active" : ""} onClick={() => setTab("youtube")}><Play size={16}/> YouTube & convert</button>
     </div>
     {tab === "separate" ? <div className="local-tool-panel">
       <div className="local-intro"><span className="local-kicker">01 / SOURCE SEPARATION</span><h3>Take the vocals out.<br/><em>Keep the music.</em></h3><p>Demucs AI separates your track into vocals, drums, bass and other instruments. Processing runs in your browser with WebGPU or CPU fallback.</p></div>
@@ -319,6 +367,18 @@ export default function RemixWorkspace() {
       <div className="finder-input-row"><input id="music-query" className="text-input" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && query.trim()) window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer"); }} placeholder="e.g. song title and artist"/><button className="generate-button" disabled={!query.trim()} onClick={() => window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer")}><Search size={17}/> Search</button></div>
       <div className="source-link-grid">{sourceLinks.map((source) => <a key={source.name} href={query.trim() ? source.url : undefined} target="_blank" rel="noreferrer" aria-disabled={!query.trim()} onClick={(e) => { if (!query.trim()) e.preventDefault(); }}><span>{source.name}</span><span>Open results ↗</span></a>)}</div>
       <div className="local-model-note"><b>Identification note:</b> automatic recognition uses the AcoustID catalogue. MusicAI links to matching searches on music platforms but does not download or rehost tracks.</div>
+    </div> : <div className="local-tool-panel youtube-panel">
+      <div className="local-intro"><span className="local-kicker">03 / VIDEO PREVIEW & AUDIO CONVERSION</span><h3>Preview the video.<br/><em>Explore the details.</em></h3><p>Paste a YouTube link to view its embedded player, thumbnail and available title/channel details. Album and release details appear when a recording is identified through MusicAI.</p></div>
+      <label className="field-label" htmlFor="youtube-url">YOUTUBE VIDEO URL OR ID</label>
+      <div className="finder-input-row"><input id="youtube-url" className="text-input" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void loadYoutubePreview(); }} placeholder="https://www.youtube.com/watch?v=..."/><button className="generate-button" onClick={loadYoutubePreview} disabled={youtubeLoading || !youtubeUrl.trim()}>{youtubeLoading ? <><LoaderCircle className="spin" size={17}/> Loading…</> : <><Search size={17}/> Preview</>}</button></div>
+      {youtubeError && <div className="error-message"><CircleAlert size={17}/>{youtubeError}</div>}
+      {youtubeVideo && <div className="youtube-preview">
+        <div className="youtube-player"><iframe src={"https://www.youtube-nocookie.com/embed/" + youtubeVideo.id} title={youtubeVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen referrerPolicy="strict-origin-when-cross-origin"/></div>
+        <div className="youtube-details"><img src={youtubeVideo.thumbnail} alt="Video thumbnail"/><div><span className="local-kicker">YOUTUBE VIDEO DETAILS</span><h3>{youtubeVideo.title}</h3><p>{youtubeVideo.author}</p><a className="stem-download" href={"https://www.youtube.com/watch?v=" + youtubeVideo.id} target="_blank" rel="noreferrer">Open on YouTube ↗</a></div></div>
+      </div>}
+      <div className="local-model-note"><b>About downloads:</b> MusicAI does not rip or extract audio from YouTube. You can preview videos here and use the converter below for audio files you own or are authorized to process.</div>
+      <div className="youtube-convert-card"><div><span className="local-kicker">LOCAL FILE CONVERTER</span><h3>Convert an audio file to WAV.</h3><p>{file ? "Selected file: " + file.name : "Choose an audio file in the Vocal remover tab first."} Conversion happens in your browser; no upload to MusicAI.</p></div><button className="generate-button" onClick={convertUploadToWav} disabled={!file || converting}>{converting ? <><LoaderCircle className="spin" size={17}/> Converting…</> : <><Download size={17}/> Convert & download WAV</>}</button></div>
+      <div className="local-model-note"><b>Album and release information:</b> identify a recording in the Music Identification tab to see catalogue album information and links to YouTube, Spotify, SoundCloud, Apple Music and Bandcamp. YouTube's video metadata does not reliably include an official album or track release.</div>
     </div>}
   </div>;
 }
