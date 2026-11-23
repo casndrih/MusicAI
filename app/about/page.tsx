@@ -57,7 +57,6 @@ export default async function AboutPage() {
           <a className="github-handle" href="https://github.com/casndrih" target="_blank" rel="noreferrer">@casndrih <ExternalLink size={13}/></a>
           <p>{profile?.bio || "Software developer building web and mobile applications, tools and creative technology."}</p>
           {profile?.location && <span className="developer-location">{profile.location}</span>}
-          <a className="button button-primary developer-profile-link" href="https://github.com/casndrih" target="_blank" rel="noreferrer"><Github size={16}/> View GitHub profile <ArrowUpRight size={15}/></a>
         </div>
         <div className="github-stats">
           <div><b>{profile ? profile.public_repos : "—"}</b><span>PUBLIC REPOS</span></div>
