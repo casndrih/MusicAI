@@ -10,7 +10,7 @@ const SEGMENT = 343980;
 const OVERLAP = Math.floor(SEGMENT / 4);
 const STRIDE = SEGMENT - OVERLAP;
 const MAX_SECONDS = 180;
-const ACOUSTID_CLIENT_KEY = "CDS2IAQHPK";
+const ACOUSTID_CLIENT_KEY = "wiWMaMKtTR";
 
 type Stem = { name: string; url: string; size: number };
 
