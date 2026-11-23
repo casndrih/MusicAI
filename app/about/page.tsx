@@ -59,7 +59,7 @@ export default async function AboutPage() {
       <div className="eyebrow"><span className="eyebrow-dot"/> THE PERSON BEHIND THE PROJECT</div>
       <h1>Built with curiosity.<br/><em>Made for music.</em></h1>
       <p>MusicAI is an independent project designed and developed by <strong>{developerName}</strong>. I built it to make experimenting with new musical directions feel simple, creative and accessible.</p>
-      <a className="button button-primary" href="/#remixer"><Sparkles size={17}/> Try the remixer <ArrowUpRight size={16}/></a>
+      <Link className="button button-primary" href="/#remixer"><Sparkles size={17}/> Try the remixer <ArrowUpRight size={16}/></Link>
     </section>
     <section className="about-content">
       <article className="developer-card">
