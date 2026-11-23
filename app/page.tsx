@@ -20,7 +20,7 @@ export default function Home() {
       </div>
       <div className="hero-art" aria-label="Abstract music record artwork"><div className="orbit orbit-a"/><div className="orbit orbit-b"/>
         <div className="vinyl"><div className="vinyl-grooves"/><div className="vinyl-label"><AudioWaveform size={37}/><small>MA</small></div></div>
-        <div className="floating-card card-top"><span className="mini-wave">{Array.from({length:18},(_,i)=><i key={i} style={{height:`${12+(i*17)%31}px`}/>)}</span><span><b>LOCAL AI MODEL</b><small>Vocals · drums · bass · other</small></span></div>
+        <div className="floating-card card-top"><span className="mini-wave">{Array.from({length:18},(_,i)=><i key={i} style={{height:`${12+(i*17)%31}px`}} />)}</span><span><b>LOCAL AI MODEL</b><small>Vocals · drums · bass · other</small></span></div>
         <div className="floating-card card-bottom"><span className="equalizer"><i/><i/><i/><i/><i/></span><span><b>STEM SEPARATION</b><small>Source mix → separated stems</small></span><span className="live-dot"/></div>
         <div className="art-caption">MAKE ROOM FOR A NEW SOUND <span>✳</span></div>
       </div>
