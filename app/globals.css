@@ -162,3 +162,25 @@
 .site-footer a:not(.brand){color:var(--accent,#a78bfa);text-decoration:none}
 @media(max-width:760px){.about-hero{padding-top:78px;padding-bottom:65px}.developer-card{grid-template-columns:68px 1fr;padding:22px;gap:18px}.developer-avatar{width:64px;height:64px;border-radius:19px;font-size:22px}.github-stats{grid-column:1/-1;border-left:0;border-top:1px solid var(--line,#30283c);padding:18px 0 0;justify-content:space-around}.about-story-grid,.about-repo-grid{grid-template-columns:1fr}.about-story-grid{margin-bottom:65px}.about-project-heading{align-items:start;flex-direction:column}.about-footer{align-items:flex-start;flex-direction:column}}
 @media(prefers-color-scheme:light){.about-page{background:#fbf9ff;color:#302447}.about-topbar,.about-footer{border-color:#e5ddf5}.about-back,.about-footer{color:#817891}.developer-card,.about-story,.about-repo-card{background:#fff;border-color:#e5ddf5}.developer-copy p,.about-story p,.about-repo-card p{color:#6f6684}.github-stats{border-color:#e5ddf5}.github-stats span,.muted-label{color:#817891}}
+
+/* Consistent fully-rounded pill buttons */
+.button,
+.header-cta,
+.generate-button,
+.preset-row button,
+.mode-tabs button,
+.mix-option,
+.icon-button,
+.about-back,
+.developer-profile-link,
+.text-link,
+.example-style a,
+.site-footer a:not(.brand),
+.about-project-heading .text-link {
+  border-radius: 9999px;
+}
+.generate-button { min-height: 50px; }
+.preset-row button { padding-inline: 14px; }
+.mode-tabs button { padding-inline: 16px; }
+.mix-option { padding: 13px 15px; }
+.icon-button { width: 36px; height: 36px; }
