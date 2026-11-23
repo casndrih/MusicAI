@@ -29,8 +29,8 @@ export default function Home() {
         <div className="hero-copy">
           <div className="eyebrow"><span className="eyebrow-dot"/> AI MUSIC STUDIO <span className="eyebrow-line"/></div>
           <h1>Your music.<br/><span>A new dimension.</span></h1>
-          <p className="hero-description">Reimagine any track with AI. Flip the genre, reshape the mood, and discover a sound you didn't know was there.</p>
-          <div className="hero-actions"><a className="button button-primary" href="#remixer"><WandSparkles size={17}/> Remix a song <ArrowUpRight size={16}/></a><a className="text-link" href="#examples">Hear what's possible <span>↗</span></a></div>
+          <p className="hero-description">Reimagine any track with AI. Flip the genre, reshape the mood, and discover a sound you didn&apos;t know was there.</p>
+          <div className="hero-actions"><a className="button button-primary" href="#remixer"><WandSparkles size={17}/> Remix a song <ArrowUpRight size={16}/></a><a className="text-link" href="#examples">Hear what&apos;s possible <span>↗</span></a></div>
           <div className="hero-proof"><div className="proof-icons"><span><Music2 size={14}/></span><span><Disc3 size={14}/></span><span><Headphones size={14}/></span></div><span>One track. Infinite directions.</span></div>
         </div>
         <div className="hero-art" aria-label="Abstract audio waveform artwork">
