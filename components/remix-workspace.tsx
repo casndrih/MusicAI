@@ -378,7 +378,7 @@ export default function RemixWorkspace() {
         <div className="local-stem-list">{stems.map((stem) => <div className="local-stem" key={stem.name}><span className="file-icon"><Music2 size={18}/></span><div><b>{stem.name}</b><small>WAV · {(stem.size / 1024 / 1024).toFixed(1)} MB</small></div><button className="icon-button" onClick={() => playStem(stem)} aria-label={"Play " + stem.name}>{playing === stem.name ? <Pause size={16}/> : <Play size={16}/>}</button><a className="stem-download" href={stem.url} download={stem.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".wav"}><Download size={15}/> Save</a></div>)}</div>
       </div>}
       {error && <div className="error-message"><CircleAlert size={17}/>{error}</div>}
-    </div> : <div className="local-tool-panel finder-panel">
+    </div> : tab === "identify" ? <div className="local-tool-panel finder-panel">
       <div className="local-intro"><span className="local-kicker">02 / MUSIC DISCOVERY</span><h3>Recognise the track.<br/><em>Find its sources.</em></h3><p>Upload a short recording to create a Chromaprint fingerprint in your browser and search the AcoustID music catalogue. No audio file is uploaded.</p></div>
       <label className="field-label" htmlFor="identify-audio">AUDIO CLIP FOR RECOGNITION</label>
       <input id="identify-audio" className="text-input" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg" onChange={chooseFile}/>
