@@ -102,7 +102,9 @@ export default function RemixWorkspace() {
       const decoded = await context.decodeAudioData(await file.arrayBuffer());
       const frames = decoded.length;
       const seconds = frames / SAMPLE_RATE;
-      if (seconds > MAX_SECONDS) throw new Error("For this browser build, audio is limited to 3 minutes per separation to protect device memory. Trim the track and try again.");
+      const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4;
+      const deviceLimit = deviceMemory <= 4 ? 60 : deviceMemory <= 8 ? 120 : MAX_SECONDS;
+      if (seconds > deviceLimit) throw new Error("This device is limited to " + Math.round(deviceLimit / 60) + " minute(s) per separation to protect memory. Trim the track and try again.");
       if (decoded.numberOfChannels < 1) throw new Error("The selected file has no audio channels.");
       const mix = [new Float32Array(frames), new Float32Array(frames)];
       for (let c = 0; c < 2; c++) mix[c].set(decoded.getChannelData(Math.min(c, decoded.numberOfChannels - 1)));
