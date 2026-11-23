@@ -20,33 +20,20 @@ type GithubProfile = {
   following: number;
 };
 
-type GithubRepo = {
-  name: string;
-  html_url: string;
-  description: string | null;
-  language: string | null;
-  stargazers_count: number;
-  fork: boolean;
-};
-
 async function getDeveloperData() {
   const headers = { Accept: "application/vnd.github+json", "User-Agent": "MusicAI-About-Page" };
   try {
-    const [profileResponse, reposResponse] = await Promise.all([
-      fetch("https://api.github.com/users/casndrih", { headers, next: { revalidate: 3600 } }),
-      fetch("https://api.github.com/users/casndrih/repos?sort=updated&per_page=6&type=owner", { headers, next: { revalidate: 3600 } })
-    ]);
+    const profileResponse = await fetch("https://api.github.com/users/casndrih", { headers, next: { revalidate: 3600 } });
     if (!profileResponse.ok) throw new Error("GitHub profile is temporarily unavailable.");
     const profile = await profileResponse.json() as GithubProfile;
-    const repos = reposResponse.ok ? await reposResponse.json() as GithubRepo[] : [];
-    return { profile, repos: repos.filter((repo) => !repo.fork).slice(0, 4), unavailable: false };
+    return { profile, unavailable: false };
   } catch {
-    return { profile: null, repos: [], unavailable: true };
+    return { profile: null, unavailable: true };
   }
 }
 
 export default async function AboutPage() {
-  const { profile, repos, unavailable } = await getDeveloperData();
+  const { profile, unavailable } = await getDeveloperData();
   const developerName = profile?.name || "Casper Ndrih";
 
   return <main className="about-page">
@@ -92,11 +79,6 @@ export default async function AboutPage() {
           <h3>Explore another side of a song.</h3>
           <p>Upload an audio track, describe a new genre or production direction, then generate one or two alternate interpretations with the configured AI model.</p>
         </article>
-      </div>
-      <div className="about-project-heading"><div><div className="eyebrow"><span className="eyebrow-dot"/> OPEN SOURCE PROJECT</div><h2>More from <em>GitHub.</em></h2></div><a className="text-link" href="https://github.com/casndrih/MusicAI" target="_blank" rel="noreferrer">MusicAI source code <ArrowUpRight size={15}/></a></div>
-      <div className="about-repo-grid">
-        {repos.map((repo) => <a className="about-repo-card" key={repo.name} href={repo.html_url} target="_blank" rel="noreferrer"><div><Github size={17}/><span>{repo.fork ? "FORK" : "REPOSITORY"}</span><ArrowUpRight size={15}/></div><h3>{repo.name}</h3><p>{repo.description || "A public project on GitHub."}</p><footer><span>{repo.language || "Code"}</span><span>★ {repo.stargazers_count}</span></footer></a>)}
-        {!repos.length && <a className="about-repo-card" href="https://github.com/casndrih/MusicAI" target="_blank" rel="noreferrer"><div><Github size={17}/><span>FEATURED REPOSITORY</span><ArrowUpRight size={15}/></div><h3>MusicAI</h3><p>Explore the source code for this independent AI music remix studio.</p><footer><span>Next.js · TypeScript</span><span>View project ↗</span></footer></a>}
       </div>
     </section>
     <footer className="about-footer"><Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={20}/></span><span>music<span className="brand-accent">ai</span></span></Link><span>Independent project by <a href="https://github.com/casndrih" target="_blank" rel="noreferrer">casndrih</a>.</span></footer>
