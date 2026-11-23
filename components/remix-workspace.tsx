@@ -216,7 +216,7 @@ export default function RemixWorkspace() {
             id?: string;
             title?: string;
             artists?: Array<{ name?: string }>;
-            releases?: Array<{ title?: string }>;
+            releasegroups?: Array<{ title?: string }>;
           }>;
         }>;
       };
@@ -232,7 +232,7 @@ export default function RemixWorkspace() {
       setIdentifyResult({
         title: match.recording.title,
         artist: (match.recording.artists || []).map((artist) => artist.name).filter(Boolean).join(", ") || "Unknown artist",
-        album: match.recording.releases?.[0]?.title || "Album not listed",
+        album: match.recording.releasegroups?.[0]?.title || "Album not listed",
         score: match.score,
         recordingId: match.recording.id
       });
@@ -307,7 +307,7 @@ export default function RemixWorkspace() {
         { name: "Apple Music", url: "https://music.apple.com/search?term=" },
         { name: "Bandcamp", url: "https://bandcamp.com/search?q=" }
       ].map((source) => <a key={source.name} href={source.url + encodeURIComponent(identifyResult.title + " " + identifyResult.artist)} target="_blank" rel="noreferrer"><span>{source.name}</span><span>Open result ↗</span></a>)}</div>{identifyResult.recordingId && <a className="stem-download" href={"https://musicbrainz.org/recording/" + identifyResult.recordingId} target="_blank" rel="noreferrer">View MusicBrainz recording ↗</a>}</div>}
-      <div className="local-model-note"><b>Recognition notes:</b> Chromaprint generates a compact audio fingerprint locally; only that fingerprint, clip duration and your AcoustID application key are sent to AcoustID for catalogue matching. Results depend on AcoustID coverage and may not identify obscure, live or unreleased recordings. Register a key at acoustid.org and respect its non-commercial usage and rate limits.</div>
+      <div className="local-model-note"><b>Recognition notes:</b> Chromaprint generates a compact audio fingerprint locally; only that fingerprint, clip duration and your AcoustID application key are sent to AcoustID for catalogue matching. Results depend on AcoustID coverage and may not identify obscure, live or unreleased recordings. Register an application key at https://acoustid.org/new-application and respect AcoustID’s non-commercial usage and rate limits.</div>
       <label className="field-label" htmlFor="music-query">OR SEARCH BY SONG TITLE, ARTIST OR PHRASE</label>
       <div className="finder-input-row"><input id="music-query" className="text-input" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && query.trim()) window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer"); }} placeholder="e.g. song title and artist"/><button className="generate-button" disabled={!query.trim()} onClick={() => window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer")}><Search size={17}/> Search</button></div>
       <div className="source-link-grid">{sourceLinks.map((source) => <a key={source.name} href={query.trim() ? source.url : undefined} target="_blank" rel="noreferrer" aria-disabled={!query.trim()} onClick={(e) => { if (!query.trim()) e.preventDefault(); }}><span>{source.name}</span><span>Open results ↗</span></a>)}</div>
