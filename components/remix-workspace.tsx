@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { AudioLines, Check, CircleAlert, Download, FileAudio, LoaderCircle, Music2, Pause, Play, Search, ShieldCheck, Upload, X } from "lucide-react";
+import { AudioLines, Check, CircleAlert, Download, LoaderCircle, Music2, Pause, Play, Search, ShieldCheck, Upload } from "lucide-react";
 
 const MODEL_URL = "https://huggingface.co/StemSplitio/htdemucs-onnx/resolve/main/htdemucs_fp16weights.onnx";
 const MODEL_SIZE = "166 MB";
@@ -53,7 +53,7 @@ export default function RemixWorkspace() {
   const [query, setQuery] = useState("");
   const [playing, setPlaying] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const modelRef = useRef<any>(null);
+  const modelRef = useRef<import("onnxruntime-web").InferenceSession | null>(null);
 
   useEffect(() => () => {
     stems.forEach((stem) => URL.revokeObjectURL(stem.url));
@@ -97,6 +97,8 @@ export default function RemixWorkspace() {
           });
         }
       }
+      const session = modelRef.current;
+      if (!session) throw new Error("The local AI model could not be initialized.");
       setStatus("Decoding audio on this device…");
       context = new AudioContext({ sampleRate: SAMPLE_RATE });
       const decoded = await context.decodeAudioData(await file.arrayBuffer());
@@ -121,7 +123,7 @@ export default function RemixWorkspace() {
         chunkBuffer.fill(0);
         chunkBuffer.set(mix[0].subarray(start, end), 0);
         chunkBuffer.set(mix[1].subarray(start, end), SEGMENT);
-        const result = await modelRef.current.run({
+        const result = await session.run({
           mix: new ort.Tensor("float32", chunkBuffer, [1, 2, SEGMENT])
         });
         const data = result.stems.data as Float32Array;
