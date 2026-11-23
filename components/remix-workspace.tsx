@@ -48,7 +48,11 @@ export default function RemixWorkspace() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [activeAudio, setActiveAudio] = useState<HTMLAudioElement | null>(null);
 
-  useEffect(() => () => { if (track?.url) URL.revokeObjectURL(track.url); activeAudio?.pause(); }, [track, activeAudio]);
+  useEffect(() => {
+    const url = track?.url;
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [track]);
+  useEffect(() => () => { activeAudio?.pause(); }, [activeAudio]);
 
   useEffect(() => {
     if (!jobs.length) return;
