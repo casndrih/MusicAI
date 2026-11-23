@@ -51,6 +51,11 @@ export default function RemixWorkspace() {
   const [error, setError] = useState("");
   const [stems, setStems] = useState<Stem[]>([]);
   const [query, setQuery] = useState("");
+  const [acoustIdKey, setAcoustIdKey] = useState(process.env.NEXT_PUBLIC_ACOUSTID_CLIENT_KEY || "");
+  const [identifying, setIdentifying] = useState(false);
+  const [identifyStatus, setIdentifyStatus] = useState("");
+  const [identifyError, setIdentifyError] = useState("");
+  const [identifyResult, setIdentifyResult] = useState<{ title: string; artist: string; album: string; score: number; recordingId?: string } | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const modelRef = useRef<import("onnxruntime-web").InferenceSession | null>(null);
@@ -164,6 +169,83 @@ export default function RemixWorkspace() {
     }
   };
 
+  const identifyTrack = async () => {
+    if (!file) { setIdentifyError("Choose an audio file first."); return; }
+    if (!acoustIdKey.trim()) { setIdentifyError("Enter your AcoustID application key to enable recognition."); return; }
+    setIdentifying(true); setIdentifyError(""); setIdentifyResult(null);
+    let context: AudioContext | null = null;
+    try {
+      setIdentifyStatus("Decoding audio locally…");
+      context = new AudioContext({ sampleRate: 44100 });
+      const decoded = await context.decodeAudioData(await file.arrayBuffer());
+      const sampleRate = decoded.sampleRate;
+      const duration = Math.min(decoded.duration, 120);
+      const frames = Math.floor(duration * sampleRate);
+      if (duration < 8) throw new Error("Choose a clip at least 8 seconds long for a reliable match.");
+      setIdentifyStatus("Generating a Chromaprint fingerprint in your browser…");
+      const left = decoded.getChannelData(0);
+      const right = decoded.numberOfChannels > 1 ? decoded.getChannelData(1) : left;
+      const interleaved = new Int16Array(frames * 2);
+      for (let i = 0; i < frames; i++) {
+        interleaved[i * 2] = Math.max(-32768, Math.min(32767, Math.round(left[i] * 32767)));
+        interleaved[i * 2 + 1] = Math.max(-32768, Math.min(32767, Math.round(right[i] * 32767)));
+      }
+      const chroma = await import("rusty-chromaprint-wasm");
+      const fingerprint = chroma.fingerprintFromSamples(sampleRate, 2, interleaved);
+      if (!fingerprint.compressed) throw new Error("Could not generate an audio fingerprint from this file.");
+      setIdentifyStatus("Checking the AcoustID music catalogue…");
+      const body = new URLSearchParams({
+        client: acoustIdKey.trim(),
+        duration: String(Math.round(duration)),
+        fingerprint: fingerprint.compressed,
+        meta: "recordings+releasegroups+compress",
+        format: "json"
+      });
+      const response = await fetch("https://api.acoustid.org/v2/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+      if (!response.ok) throw new Error("AcoustID lookup failed (HTTP " + response.status + "). Check your key or try again.");
+      const payload = await response.json() as {
+        status?: string;
+        error?: { message?: string };
+        results?: Array<{
+          score?: number;
+          recordings?: Array<{
+            id?: string;
+            title?: string;
+            artists?: Array<{ name?: string }>;
+            releases?: Array<{ title?: string }>;
+          }>;
+        }>;
+      };
+      if (payload.status !== "ok") throw new Error(payload.error?.message || "The music catalogue could not complete this lookup.");
+      const matches = (payload.results || [])
+        .flatMap((item) => (item.recordings || []).map((recording) => ({ recording, score: item.score || 0 })))
+        .sort((a, b) => b.score - a.score);
+      const match = matches[0];
+      if (!match?.recording?.title) {
+        setIdentifyStatus("No catalogue match found. Try a clearer or longer section of the original recording.");
+        return;
+      }
+      setIdentifyResult({
+        title: match.recording.title,
+        artist: (match.recording.artists || []).map((artist) => artist.name).filter(Boolean).join(", ") || "Unknown artist",
+        album: match.recording.releases?.[0]?.title || "Album not listed",
+        score: match.score,
+        recordingId: match.recording.id
+      });
+      setIdentifyStatus("A possible match was found. Check the title and artist before opening a platform.");
+    } catch (cause) {
+      setIdentifyError(cause instanceof Error ? cause.message : "Audio recognition failed. Try another file.");
+      setIdentifyStatus("");
+    } finally {
+      await context?.close().catch(() => undefined);
+      setIdentifying(false);
+    }
+  };
+
   const playStem = (stem: Stem) => {
     if (playing === stem.name) { audioRef.current?.pause(); setPlaying(null); return; }
     audioRef.current?.pause();
@@ -208,8 +290,25 @@ export default function RemixWorkspace() {
       </div>}
       {error && <div className="error-message"><CircleAlert size={17}/>{error}</div>}
     </div> : <div className="local-tool-panel finder-panel">
-      <div className="local-intro"><span className="local-kicker">02 / MUSIC DISCOVERY</span><h3>Find the track.<br/><em>Find its sources.</em></h3><p>Search music catalogues and streaming platforms by song title, artist or lyrics. Open matching results directly on the source platform.</p></div>
-      <label className="field-label" htmlFor="music-query">SONG TITLE, ARTIST OR SEARCH PHRASE</label>
+      <div className="local-intro"><span className="local-kicker">02 / MUSIC DISCOVERY</span><h3>Recognise the track.<br/><em>Find its sources.</em></h3><p>Upload a short recording to create a Chromaprint fingerprint in your browser and search the AcoustID music catalogue. No audio file is uploaded.</p></div>
+      <label className="field-label" htmlFor="identify-audio">AUDIO CLIP FOR RECOGNITION</label>
+      <input id="identify-audio" className="text-input" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg" onChange={chooseFile}/>
+      {file && <p className="local-status"><ShieldCheck size={14}/> Selected: {file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB</p>}
+      <label className="field-label" htmlFor="acoustid-key">ACOUSTID APPLICATION KEY</label>
+      <input id="acoustid-key" className="text-input" value={acoustIdKey} onChange={(e) => setAcoustIdKey(e.target.value)} placeholder="Paste your AcoustID client key"/>
+      <p className="local-status">Your key is used only in this browser session and is not saved by MusicAI.</p>
+      <button className="generate-button" onClick={identifyTrack} disabled={identifying || !file}>{identifying ? <><LoaderCircle className="spin" size={18}/> Identifying on this device…</> : <><Search size={18}/> Identify this recording <span>↗</span></>}</button>
+      {identifyStatus && <p className="local-status">{identifyStatus}</p>}
+      {identifyError && <div className="error-message"><CircleAlert size={17}/>{identifyError}</div>}
+      {identifyResult && <div className="identify-result"><span className="local-kicker">POSSIBLE MATCH · {(identifyResult.score * 100).toFixed(0)}% CATALOGUE SCORE</span><h3>{identifyResult.title}</h3><p>{identifyResult.artist}</p><small>{identifyResult.album}</small><div className="source-link-grid">{[
+        { name: "YouTube", url: "https://www.youtube.com/results?search_query=" },
+        { name: "Spotify", url: "https://open.spotify.com/search/" },
+        { name: "SoundCloud", url: "https://soundcloud.com/search?q=" },
+        { name: "Apple Music", url: "https://music.apple.com/search?term=" },
+        { name: "Bandcamp", url: "https://bandcamp.com/search?q=" }
+      ].map((source) => <a key={source.name} href={source.url + encodeURIComponent(identifyResult.title + " " + identifyResult.artist)} target="_blank" rel="noreferrer"><span>{source.name}</span><span>Open result ↗</span></a>)}</div>{identifyResult.recordingId && <a className="stem-download" href={"https://musicbrainz.org/recording/" + identifyResult.recordingId} target="_blank" rel="noreferrer">View MusicBrainz recording ↗</a>}</div>}
+      <div className="local-model-note"><b>Recognition notes:</b> Chromaprint generates a compact audio fingerprint locally; only that fingerprint, clip duration and your AcoustID application key are sent to AcoustID for catalogue matching. Results depend on AcoustID coverage and may not identify obscure, live or unreleased recordings. Register a key at acoustid.org and respect its non-commercial usage and rate limits.</div>
+      <label className="field-label" htmlFor="music-query">OR SEARCH BY SONG TITLE, ARTIST OR PHRASE</label>
       <div className="finder-input-row"><input id="music-query" className="text-input" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && query.trim()) window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer"); }} placeholder="e.g. song title and artist"/><button className="generate-button" disabled={!query.trim()} onClick={() => window.open(sourceLinks[0].url, "_blank", "noopener,noreferrer")}><Search size={17}/> Search</button></div>
       <div className="source-link-grid">{sourceLinks.map((source) => <a key={source.name} href={query.trim() ? source.url : undefined} target="_blank" rel="noreferrer" aria-disabled={!query.trim()} onClick={(e) => { if (!query.trim()) e.preventDefault(); }}><span>{source.name}</span><span>Open results ↗</span></a>)}</div>
       <div className="local-model-note"><b>Identification note:</b> this finder searches the platforms using the title, artist or phrase you provide. Automatic recognition from an unknown audio recording is not enabled yet; that requires a dedicated fingerprint catalogue and its own service/API access. MusicAI does not download or rehost tracks from these platforms.</div>
