@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, AudioWaveform, Code2, ExternalLink, Github, Music2, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -50,8 +51,8 @@ export default async function AboutPage() {
 
   return <main className="about-page">
     <div className="about-topbar">
-      <a className="brand" href="/"><span className="brand-mark"><AudioWaveform size={22}/></span><span>music<span className="brand-accent">ai</span></span></a>
-      <a className="about-back" href="/"><ArrowLeft size={15}/> Back to MusicAI</a>
+      <Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={22}/></span><span>music<span className="brand-accent">ai</span></span></Link>
+      <Link className="about-back" href="/"><ArrowLeft size={15}/> Back to MusicAI</Link>
     </div>
     <section className="about-hero">
       <div className="about-hero-glow"/>
@@ -98,6 +99,6 @@ export default async function AboutPage() {
         {!repos.length && <a className="about-repo-card" href="https://github.com/casndrih/MusicAI" target="_blank" rel="noreferrer"><div><Github size={17}/><span>FEATURED REPOSITORY</span><ArrowUpRight size={15}/></div><h3>MusicAI</h3><p>Explore the source code for this independent AI music remix studio.</p><footer><span>Next.js · TypeScript</span><span>View project ↗</span></footer></a>}
       </div>
     </section>
-    <footer className="about-footer"><a className="brand" href="/"><span className="brand-mark"><AudioWaveform size={20}/></span><span>music<span className="brand-accent">ai</span></span></a><span>Independent project by <a href="https://github.com/casndrih" target="_blank" rel="noreferrer">casndrih</a>.</span></footer>
+    <footer className="about-footer"><Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={20}/></span><span>music<span className="brand-accent">ai</span></span></Link><span>Independent project by <a href="https://github.com/casndrih" target="_blank" rel="noreferrer">casndrih</a>.</span></footer>
   </main>;
 }
