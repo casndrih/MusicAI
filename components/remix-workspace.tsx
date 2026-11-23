@@ -78,13 +78,24 @@ export default function RemixWorkspace() {
     try {
       setStatus("Loading the local AI engine. First download is about " + MODEL_SIZE + ".");
       const hasGpu = Boolean((navigator as Navigator & { gpu?: unknown }).gpu);
-      const ort = hasGpu ? await import("onnxruntime-web/webgpu") : await import("onnxruntime-web");
+      let ort = hasGpu ? await import("onnxruntime-web/webgpu") : await import("onnxruntime-web");
       ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/";
       if (!modelRef.current) {
-        modelRef.current = await ort.InferenceSession.create(MODEL_URL, {
-          executionProviders: [hasGpu ? "webgpu" : "wasm"],
-          graphOptimizationLevel: "all"
-        });
+        try {
+          modelRef.current = await ort.InferenceSession.create(MODEL_URL, {
+            executionProviders: [hasGpu ? "webgpu" : "wasm"],
+            graphOptimizationLevel: "all"
+          });
+        } catch (gpuError) {
+          if (!hasGpu) throw gpuError;
+          setStatus("WebGPU is unavailable on this device. Switching to browser CPU processing…");
+          ort = await import("onnxruntime-web");
+          ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/";
+          modelRef.current = await ort.InferenceSession.create(MODEL_URL, {
+            executionProviders: ["wasm"],
+            graphOptimizationLevel: "all"
+          });
+        }
       }
       setStatus("Decoding audio on this device…");
       context = new AudioContext({ sampleRate: SAMPLE_RATE });
