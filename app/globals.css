@@ -184,3 +184,22 @@
 .mode-tabs button { padding-inline: 16px; }
 .mix-option { padding: 13px 15px; }
 .icon-button { width: 36px; height: 36px; }
+
+/* Animated vinyl record in the homepage hero */
+.hero-art .vinyl {
+  animation: musicai-vinyl-spin 7s linear infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@keyframes musicai-vinyl-spin {
+  from { transform: rotate(-18deg); }
+  to { transform: rotate(342deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .vinyl {
+    animation: none;
+  }
+}
+
