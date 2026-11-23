@@ -7,12 +7,12 @@ const examples = [
   { n: "03", name: "Skyline Nights", style: "Drum & bass", genre: "DNB", color: "art-blue", note: "Rolling breaks, atmospheric layers and deep sub bass." }
 ];
 const features = [
-  [<Waves size={21}/>, "Change the genre", "Reimagine a track as house, hip-hop, synthwave, Afrobeats, drum & bass or another style."],
-  [<Disc3 size={21}/>, "Find a lo-fi feel", "Explore mellow keys, softened percussion and a warmer, more relaxed production direction."],
-  [<Radio size={21}/>, "Build club energy", "Ask for punchier drums, stronger low end and a bigger, dance-focused arrangement."],
-  [<Clapperboard size={21}/>, "Go cinematic", "Try atmospheric textures, dramatic builds and a widescreen sense of movement."],
-  [<Guitar size={21}/>, "Shift the arrangement", "Guide the model toward different instruments, rhythmic emphasis and production textures."],
-  [<Mic2 size={21}/>, "Shape vocal direction", "Add vocal notes or lyric ideas as prompt guidance. Dedicated vocal replacement is not available yet."]
+  [<Waves key="genre" size={21}/>, "Change the genre", "Reimagine a track as house, hip-hop, synthwave, Afrobeats, drum & bass or another style."],
+  [<Disc3 key="lofi" size={21}/>, "Find a lo-fi feel", "Explore mellow keys, softened percussion and a warmer, more relaxed production direction."],
+  [<Radio key="club" size={21}/>, "Build club energy", "Ask for punchier drums, stronger low end and a bigger, dance-focused arrangement."],
+  [<Clapperboard key="cinematic" size={21}/>, "Go cinematic", "Try atmospheric textures, dramatic builds and a widescreen sense of movement."],
+  [<Guitar key="arrangement" size={21}/>, "Shift the arrangement", "Guide the model toward different instruments, rhythmic emphasis and production textures."],
+  [<Mic2 key="vocal" size={21}/>, "Shape vocal direction", "Add vocal notes or lyric ideas as prompt guidance. Dedicated vocal replacement is not available yet."]
 ];
 const steps = [
   ["01", "Upload your track", "Bring an MP3, WAV or M4A file you own or have permission to use."],
