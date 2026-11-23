@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
-import { AudioLines, Check, ChevronDown, CircleAlert, Download, FileAudio, LoaderCircle, Music2, Pause, Play, Plus, RefreshCw, Sparkles, Upload, X } from "lucide-react";
+import { AudioLines, Check, ChevronDown, CircleAlert, Download, FileAudio, LoaderCircle, Pause, Play, Sparkles, Upload, X } from "lucide-react";
 
 type Job = { id: string; status: string; output?: unknown; error?: string; logs?: string };
 type Track = { name: string; size: number; file: File; url: string };
