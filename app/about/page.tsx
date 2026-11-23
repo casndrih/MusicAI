@@ -38,7 +38,7 @@ export default async function AboutPage() {
 
   return <main className="about-page">
     <div className="about-topbar">
-      <Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={22}/></span><span>music<span className="brand-accent">ai</span></span></Link>
+      <Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={22}/></span><span>Music<span className="brand-accent">AI</span></span></Link>
       <Link className="about-back" href="/"><ArrowLeft size={15}/> Back to MusicAI</Link>
     </div>
     <section className="about-hero">
@@ -80,6 +80,6 @@ export default async function AboutPage() {
         </article>
       </div>
     </section>
-    <footer className="about-footer"><Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={20}/></span><span>music<span className="brand-accent">ai</span></span></Link><span>Independent project by <a href="https://github.com/casndrih" target="_blank" rel="noreferrer">casndrih</a>.</span></footer>
+    <footer className="about-footer"><Link className="brand" href="/"><span className="brand-mark"><AudioWaveform size={20}/></span><span>Music<span className="brand-accent">AI</span></span></Link><span>Independent project by <a href="https://github.com/casndrih" target="_blank" rel="noreferrer">casndrih</a>.</span></footer>
   </main>;
 }
