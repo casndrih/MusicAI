@@ -281,3 +281,16 @@
 .identify-result>small{font-size:12px;color:var(--muted,#a39aaa)}
 .identify-result .source-link-grid{margin-top:12px}
 @media(prefers-color-scheme:light){.identify-result{background:#fff;border-color:#e5ddf5}.identify-result p,.identify-result>small{color:#6f6684}}
+
+
+/* Official Spotify preview embeds */
+.spotify-preview-section{display:grid;gap:13px;padding:22px;border:1px solid var(--line,#30283c);border-radius:18px;background:var(--panel,#111019)}
+.spotify-preview-section>h3{font-size:22px;letter-spacing:-.03em;margin:0}
+.spotify-preview-section>p{font-size:13px;line-height:1.65;color:var(--muted,#a39aaa);margin:0}
+.spotify-preview-card{display:grid;grid-template-columns:84px minmax(0,1fr);gap:13px;align-items:center;padding:14px;border:1px solid var(--line,#30283c);border-radius:15px;background:var(--bg,#09080d)}
+.spotify-preview-card>img{width:84px;height:84px;object-fit:cover;border-radius:10px}
+.spotify-preview-copy{min-width:0;display:grid;gap:7px}
+.spotify-preview-copy h3{font-size:17px;line-height:1.3;margin:0;overflow-wrap:anywhere}
+.spotify-preview-card iframe{grid-column:1/-1;width:100%;height:152px;border:0;border-radius:12px}
+@media(max-width:640px){.spotify-preview-section{padding:16px}.spotify-preview-card{grid-template-columns:64px minmax(0,1fr);padding:10px}.spotify-preview-card>img{width:64px;height:64px}.spotify-preview-card iframe{height:152px}}
+@media(prefers-color-scheme:light){.spotify-preview-section{background:#fff;border-color:#e5ddf5}.spotify-preview-section>p{color:#6f6684}.spotify-preview-card{background:#fbf9ff;border-color:#e5ddf5}}
