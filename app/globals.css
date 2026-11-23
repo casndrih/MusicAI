@@ -115,3 +115,50 @@
   .error-message{background:#f3efff;border-color:#d8cafa;color:#5534a5}
   .starting-banner{border-color:#e5ddf5;color:#7652d5}
 }
+
+
+/* About page */
+.about-page{min-height:100vh;background:var(--bg,#09080d);color:var(--text,#f7f4fb);overflow:hidden}
+.about-topbar{max-width:1200px;margin:auto;padding:28px 6%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line,#27222f)}
+.about-back{display:inline-flex;align-items:center;gap:9px;color:var(--muted,#a39aaa);font-size:13px;text-decoration:none}
+.about-hero{position:relative;max-width:1200px;margin:auto;padding:110px 6% 90px;overflow:hidden}
+.about-hero-glow{position:absolute;width:460px;height:460px;right:4%;top:-160px;border-radius:50%;background:radial-gradient(circle,#7652d544,transparent 68%);pointer-events:none}
+.about-hero .eyebrow,.about-hero h1,.about-hero p,.about-hero .button{position:relative}
+.about-hero h1{font-size:clamp(48px,7vw,88px);line-height:1.02;letter-spacing:-.065em;margin:26px 0 22px}
+.about-hero h1 em,.about-project-heading h2 em{font-style:normal;color:var(--accent,#a78bfa)}
+.about-hero>p{max-width:650px;color:var(--muted,#a39aaa);font-size:17px;line-height:1.8;margin:0 0 30px}
+.about-content{max-width:1080px;margin:0 auto;padding:0 6% 100px}
+.developer-card{display:grid;grid-template-columns:92px 1fr auto;gap:25px;align-items:center;padding:34px;border:1px solid var(--line,#30283c);border-radius:24px;background:linear-gradient(135deg,#7652d51b,transparent 55%),var(--panel,#111019)}
+.developer-avatar{width:84px;height:84px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(140deg,#a78bfa,#5b34bb);color:#fff;font-size:27px;font-weight:800;letter-spacing:-.05em;box-shadow:0 12px 40px #7652d533}
+.developer-copy h2{font-size:27px;margin:8px 0 2px}
+.github-handle{display:inline-flex;align-items:center;gap:6px;color:var(--accent,#a78bfa);font-size:13px;text-decoration:none}
+.developer-copy p{color:var(--muted,#a39aaa);line-height:1.7;max-width:600px;margin:13px 0}
+.developer-location{font-size:12px;color:var(--muted,#a39aaa)}
+.developer-profile-link{margin-top:8px}
+.github-stats{display:flex;gap:24px;border-left:1px solid var(--line,#30283c);padding-left:25px}
+.github-stats div{display:grid;gap:6px}
+.github-stats b{font-size:25px;font-variant-numeric:tabular-nums}
+.github-stats span,.muted-label{font-size:9px;letter-spacing:.14em;color:var(--muted,#a39aaa)}
+.github-note{grid-column:1/-1;color:var(--muted,#a39aaa);font-size:12px;margin:0}
+.about-story-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:24px 0 90px}
+.about-story{padding:30px;border:1px solid var(--line,#30283c);border-radius:20px;background:var(--panel,#111019)}
+.about-story-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#7652d522;color:var(--accent,#a78bfa);margin-bottom:22px}
+.about-story h3{font-size:22px;margin:12px 0}
+.about-story p{color:var(--muted,#a39aaa);line-height:1.75;font-size:14px;margin:0}
+.about-project-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}
+.about-project-heading h2{font-size:clamp(30px,4vw,44px);letter-spacing:-.04em;margin:12px 0 0}
+.about-project-heading .text-link{display:inline-flex;align-items:center;gap:7px;color:var(--accent,#a78bfa);text-decoration:none;font-size:13px}
+.about-repo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.about-repo-card{display:block;text-decoration:none;color:inherit;padding:23px;border:1px solid var(--line,#30283c);border-radius:18px;background:var(--panel,#111019);transition:transform .2s,border-color .2s}
+.about-repo-card:hover{transform:translateY(-3px);border-color:var(--accent,#a78bfa)}
+.about-repo-card>div,.about-repo-card footer{display:flex;align-items:center;gap:9px}
+.about-repo-card>div{color:var(--accent,#a78bfa)}
+.about-repo-card>div span{font-size:9px;letter-spacing:.13em;flex:1}
+.about-repo-card h3{font-size:19px;margin:19px 0 8px}
+.about-repo-card p{font-size:13px;line-height:1.65;color:var(--muted,#a39aaa);min-height:42px}
+.about-repo-card footer{justify-content:space-between;border-top:1px solid var(--line,#30283c);padding-top:14px;margin-top:16px;color:var(--muted,#a39aaa);font-size:11px}
+.about-footer{max-width:1200px;margin:auto;padding:28px 6%;border-top:1px solid var(--line,#27222f);display:flex;justify-content:space-between;align-items:center;gap:18px;color:var(--muted,#a39aaa);font-size:12px}
+.about-footer>span a{color:var(--accent,#a78bfa);text-decoration:none}
+.site-footer a:not(.brand){color:var(--accent,#a78bfa);text-decoration:none}
+@media(max-width:760px){.about-hero{padding-top:78px;padding-bottom:65px}.developer-card{grid-template-columns:68px 1fr;padding:22px;gap:18px}.developer-avatar{width:64px;height:64px;border-radius:19px;font-size:22px}.github-stats{grid-column:1/-1;border-left:0;border-top:1px solid var(--line,#30283c);padding:18px 0 0;justify-content:space-around}.about-story-grid,.about-repo-grid{grid-template-columns:1fr}.about-story-grid{margin-bottom:65px}.about-project-heading{align-items:start;flex-direction:column}.about-footer{align-items:flex-start;flex-direction:column}}
+@media(prefers-color-scheme:light){.about-page{background:#fbf9ff;color:#302447}.about-topbar,.about-footer{border-color:#e5ddf5}.about-back,.about-footer{color:#817891}.developer-card,.about-story,.about-repo-card{background:#fff;border-color:#e5ddf5}.developer-copy p,.about-story p,.about-repo-card p{color:#6f6684}.github-stats{border-color:#e5ddf5}.github-stats span,.muted-label{color:#817891}}
