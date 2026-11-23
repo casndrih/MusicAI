@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MusicAI — Reimagine your sound",
-  description: "Turn any track into a fresh genre, mood, and sound with AI-powered music remixing.",
+  title: "MusicAI — AI Song Remix Studio",
+  description: "Reimagine your music with AI. Upload a track, choose a new direction and create alternate remix takes.",
   applicationName: "MusicAI",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://music-ai-casndrih.vercel.app"),
   openGraph: {
-    title: "MusicAI — Reimagine your sound",
-    description: "Upload a track. Choose a direction. Hear a new version.",
+    title: "MusicAI — AI Song Remix Studio",
+    description: "Upload a track. Describe a new sound. Explore AI-generated remix takes.",
     type: "website"
   }
 };
