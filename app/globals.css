@@ -185,8 +185,8 @@
 .mix-option { padding: 13px 15px; }
 .icon-button { width: 36px; height: 36px; }
 
-/* Readability pass: slightly larger typography across desktop and mobile */
-body { font-size: 16px; }
+/* Balanced typography: modestly above the original size without feeling oversized */
+body { font-size: 15px; }
 .main-nav,
 .header-cta,
 .button,
@@ -241,7 +241,7 @@ body { font-size: 16px; }
 .about-repo-card p,
 .about-repo-card footer,
 .about-footer {
-  font-size: max(12px, 1.08em);
+  font-size: max(11px, 1.02em);
 }
 .eyebrow,
 .muted-label,
@@ -255,5 +255,5 @@ body { font-size: 16px; }
 .possibility-index,
 .github-stats span,
 .about-repo-card > div span {
-  font-size: max(10px, 1.08em);
+  font-size: max(9px, 1.02em);
 }
