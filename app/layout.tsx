@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   applicationName: "MusicAI",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://music-ai-casndrih.vercel.app"),
   openGraph: {
-    title: "MusicAI — AI Song Remix Studio",
+    title: "MusicAI — Local AI Audio Studio",
     description: "Separate vocals and instruments with browser-based AI. Your audio stays on your device.",
     type: "website"
   }
