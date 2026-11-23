@@ -6,6 +6,12 @@ A responsive AI music remix web application built with **Next.js, TypeScript, an
 
 ![MusicAI](https://img.shields.io/badge/Next.js-15-black?logo=next.js) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![Replicate](https://img.shields.io/badge/AI-Replicate-6B4FBB) ![License](https://img.shields.io/badge/License-Apache--2.0-green)
 
+## Live preview
+
+**[Open the MusicAI remix studio preview](https://music-ai-blush.vercel.app/#remixer)** — this link opens the page directly at the AI remixer workspace.
+
+The project is independently designed and developed by [Casper Ndrih (@casndrih)](https://github.com/casndrih). Visit the [About page](https://music-ai-blush.vercel.app/about) for the developer profile and project background.
+
 ## Features
 
 - **Responsive remix studio** with desktop and mobile layouts.
